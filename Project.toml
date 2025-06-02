@@ -1,0 +1,7 @@
+name = "MadrigalWeb"
+uuid = "0ad38aa5-7c8a-4eec-85ef-7931bd7ba153"
+authors = ["Beforerr <zzj956959688@gmail.com> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.10"
