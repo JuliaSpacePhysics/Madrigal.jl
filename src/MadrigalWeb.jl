@@ -15,12 +15,14 @@ using PythonCall: pynew
 using Dates
 using TOML
 using HTTP
-import Base: basename
+import Base: basename, getproperty
+
+include("types.jl")
 
 const madrigalWeb = pynew()
 const MadrigalData = pynew()
 const Default_url = Ref("https://cedar.openmadrigal.org/")
-const Default_server = Ref{Py}()
+const Default_server = Ref{Server}()
 const User_name = Ref("MadrigalWeb.jl")
 const User_email = Ref("")
 const User_affiliation = Ref("MadrigalWeb.jl")
@@ -50,13 +52,14 @@ function __init__()
     end
 end
 
-get_url(server=Default_server[]) = pyconvert(String, server.cgiurl)
+get_url(server::Py) = pyconvert(String, server.cgiurl)
+get_url(server::Server) = server.url
 
 function set_default_server(url=nothing)
     url = rstrip(something(url, Default_url[]), '/')
-    isdefined(Default_server, :x) || return setindex!(Default_server, MadrigalData(url))
+    isdefined(Default_server, :x) || return setindex!(Default_server, Server(url))
     get_url(Default_server[]) == url && return Default_server[]
-    return setindex!(Default_server, MadrigalData(url))
+    return setindex!(Default_server, Server(url))
 end
 
 function set_default_user(name, email, affiliation=nothing)
@@ -65,37 +68,18 @@ function set_default_user(name, email, affiliation=nothing)
     isnothing(affiliation) || (User_affiliation[] = affiliation)
 end
 
-abstract type PyObj end
-
-
-"""
-A class that encapsulates information about a Madrigal Experiment.
-
-Similar to the `MadrigalExperiment` class in the madrigalWeb python module.
-"""
-struct Experiment <: PyObj
-    py::Py
-end
-
-struct ExperimentFile <: PyObj
-    py::Py
-end
-
-function Base.getproperty(var::T, s::Symbol) where T<:PyObj
-    s in fieldnames(T) ? getfield(var, s) : getproperty(var.py, s)
-end
 
 _compat(x::DateTime) = x
 _compat(x::String) = DateTime(x)
 
 get_kindat(exp) = pyconvert(Int, exp.kindat)
 get_kindatdesc(exp) = pyconvert(String, exp.kindatdesc)
-Base.basename(exp::ExperimentFile) = basename(pyconvert(String, exp.name))
 
 function download_files(inst, kindat, t0, t1; dir="./data",
-    server=Default_server[], user_fullname=User_name[], user_email=User_email[],
+    server=nothing, user_fullname=User_name[], user_email=User_email[],
     user_affiliation=User_affiliation[], verbose=false
 )
+    server = something(server, Default_server[])
     t0, t1 = _compat(t0), _compat(t1)
     exps = getExperiments(server, inst, t0, t1)
     files = mapreduce(vcat, exps) do exp
