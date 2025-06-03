@@ -29,6 +29,7 @@ const User_affiliation = Ref("MadrigalWeb.jl")
 
 export MadrigalData
 export download_file, download_files
+export get_experiments
 export getExperiments, get_exp_filesExperimentFiles
 export filter_by_kindat
 
@@ -52,6 +53,7 @@ function __init__()
     end
 end
 
+get_url(url) = url
 get_url(server::Py) = pyconvert(String, server.cgiurl)
 get_url(server::Server) = server.url
 
@@ -134,6 +136,17 @@ download_file(expFile::ExperimentFile, args...; kw...) = download_file(expFile.n
 function getExperiments(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
     server.getExperiments(code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
 end
+
+function get_experiments(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
+    query = (; code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
+    url = rstrip(get_url(server), '/') * "/getExperimentsService.py"
+    response = HTTP.get(url, query=query)
+    lines = split(String(response.body), "\n")
+    map(lines) do line
+        split(line, ",")
+    end
+end
+
 
 function getExperiments(server, code, t0, t1)
     t0 = Dates.DateTime(t0)
