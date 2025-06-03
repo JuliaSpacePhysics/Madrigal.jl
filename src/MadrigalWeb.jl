@@ -10,8 +10,6 @@ Reference:
 module MadrigalWeb
 
 # Write your package code here.
-using PythonCall
-using PythonCall: pynew
 using Dates
 using TOML
 using HTTP
@@ -19,43 +17,44 @@ import Base: basename, getproperty
 
 include("types.jl")
 
-const madrigalWeb = pynew()
-const MadrigalData = pynew()
 const Default_url = Ref("https://cedar.openmadrigal.org/")
 const Default_server = Ref{Server}()
+const Default_dir = Ref{String}()
 const User_name = Ref("MadrigalWeb.jl")
 const User_email = Ref("")
 const User_affiliation = Ref("MadrigalWeb.jl")
 
-export MadrigalData
 export download_file, download_files
-export get_experiments
-export getExperiments, get_exp_filesExperimentFiles
+export get_experiments, get_exp_files
 export filter_by_kindat
 
 function __init__()
-    PythonCall.pycopy!(madrigalWeb, pyimport("madrigalWeb.madrigalWeb"))
-    PythonCall.pycopy!(MadrigalData, pyimport("madrigalWeb.madrigalWeb").MadrigalData)
-
     # Check for .Madrigal.cfg in the user's home directory
     cfg_path = joinpath(homedir(), ".Madrigal.cfg")
     if isfile(cfg_path)
         try
             config = TOML.parsefile(cfg_path)
             # Set user information from config
-            haskey(config, "user_name") && (User_name[] = config["user_name"])
-            haskey(config, "user_email") && (User_email[] = config["user_email"])
-            haskey(config, "user_affiliation") && (User_affiliation[] = config["user_affiliation"])
-            haskey(config, "url") && (Default_url[] = config["url"])
+            set_default_from_config!(config)
         catch e
             @warn "Error reading .Madrigal.cfg: $e"
         end
     end
+    isdefined(Default_dir, :x) || (Default_dir[] = mktempdir())
 end
 
 get_url(url) = url
-get_url(server::Py) = pyconvert(String, server.cgiurl)
 get_url(server::Server) = server.url
+
+set_ref!(ref, c, key) = haskey(c, key) && (ref[] = c[key])
+
+function set_default_from_config!(c)
+    set_ref!(Default_url, c, "url")
+    set_ref!(Default_dir, c, "dir")
+    set_ref!(User_name, c, "user_name")
+    set_ref!(User_email, c, "user_email")
+    set_ref!(User_affiliation, c, "user_affiliation")
+end
 
 function set_default_server(url=nothing)
     url = rstrip(something(url, Default_url[]), '/')
@@ -74,16 +73,15 @@ end
 _compat(x::DateTime) = x
 _compat(x::String) = DateTime(x)
 
-get_kindat(exp) = pyconvert(Int, exp.kindat)
-get_kindatdesc(exp) = pyconvert(String, exp.kindatdesc)
+get_kindat(exp) = exp.kindat
+get_kindatdesc(exp) = exp.kindatdesc
 
-function download_files(inst, kindat, t0, t1; dir="./data",
+function download_files(inst, kindat, t0, t1; dir=Default_dir[],
     server=nothing, user_fullname=User_name[], user_email=User_email[],
     user_affiliation=User_affiliation[], verbose=false
 )
     server = something(server, Default_server[])
-    t0, t1 = _compat(t0), _compat(t1)
-    exps = getExperiments(server, inst, t0, t1)
+    exps = get_experiments(server, inst, t0, t1)
     files = mapreduce(vcat, exps) do exp
         get_exp_files(server, exp)
     end
@@ -101,13 +99,16 @@ const fileTypes = Dict("hdf5" => -2, "simple" => -1, "netCDF4" => -3)
 `throw` controls whether to throw or silently return `nothing` on request error
 """
 function download_file(filename, destination=nothing;
-    dir="./data", format="hdf5", url=Default_url[],
+    dir=Default_dir[], format="hdf5", server=Default_server[],
     name=User_name[], email=User_email[], affiliation=User_affiliation[],
     verbose=false, throw=false
 )
     mkpath(dir)
     path = @something destination joinpath(dir, basename(filename))
-    isfile(path) ? path : begin
+    if isfile(path)
+        return path
+    else
+        @info "Downloading $filename to $path"
         fileType = get(fileTypes, format, 4)
         query = Dict(
             "fileName" => filename,
@@ -117,7 +118,7 @@ function download_file(filename, destination=nothing;
             "user_affiliation" => affiliation
         )
         verbose && @info "Downloading $filename to $path"
-        url = rstrip(url, '/') * "/getMadfile.cgi"
+        url = rstrip(get_url(server), '/') * "/getMadfile.cgi"
         try
             HTTP.download(url, path; query)
         catch e
@@ -133,35 +134,42 @@ end
 
 download_file(expFile::ExperimentFile, args...; kw...) = download_file(expFile.name, args...; kw...)
 
-function getExperiments(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
-    server.getExperiments(code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
-end
-
 function get_experiments(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
     query = (; code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
     url = rstrip(get_url(server), '/') * "/getExperimentsService.py"
     response = HTTP.get(url, query=query)
-    lines = split(String(response.body), "\n")
+    lines = filter!(!isempty, split(String(response.body), "\n"))
     map(lines) do line
-        split(line, ",")
+        parts = split(line, ",")
+        id = parse(Int, parts[1])
+        Experiment(id, parts[2:end])
     end
 end
 
-
-function getExperiments(server, code, t0, t1)
-    t0 = Dates.DateTime(t0)
-    t1 = Dates.DateTime(t1)
-    startyear, startmonth, startday, starthour, startmin, startsec = Dates.year(t0), Dates.month(t0), Dates.day(t0), Dates.hour(t0), Dates.minute(t0), Dates.second(t0)
-    endyear, endmonth, endday, endhour, endmin, endsec = Dates.year(t1), Dates.month(t1), Dates.day(t1), Dates.hour(t1), Dates.minute(t1), Dates.second(t1)
-    server.getExperiments(code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
+function decompose_datetime(t::DateTime)
+    Dates.year(t), Dates.month(t), Dates.day(t), Dates.hour(t), Dates.minute(t), Dates.second(t)
 end
 
+decompose_datetime(t) = decompose_datetime(Dates.DateTime(t))
 
-function get_exp_files(server, id::Integer; getNonDefault=false)
-    map(ExperimentFile, server.getExperimentFiles(id, getNonDefault))
+get_experiments(server, code, t0, t1) = get_experiments(
+    server, code,
+    decompose_datetime(t0)...,
+    decompose_datetime(t1)...
+)
+
+"""
+    Get a list of all default MadrigalExperimentFiles for a given experiment `exp`.
+"""
+function get_exp_files(server, exp; getNonDefault=false)
+    url = rstrip(get_url(server), '/') * "/getExperimentFilesService.py"
+    response = HTTP.get(url, query=(; id=exp.id, getNonDefault))
+    lines = filter!(!isempty, split(String(response.body), "\n"))
+    map(lines) do line
+        parts = split(line, ",")
+        ExperimentFile(parts[1], parse(Int, parts[2]), parts[3:end])
+    end
 end
-
-get_exp_files(server, exp; kw...) = map(ExperimentFile, server.getExperimentFiles(exp.id; kw...))
 
 """
     filter_by_kindat(expFileList, kindat)
