@@ -1,4 +1,4 @@
-@concrete terse struct Parameter
+@concrete terse struct Parameter <: AbstractMadrigalObject
     "Parameter mnemonic (e.g., 'dti')"
     mnemonic
     description
@@ -15,6 +15,19 @@
     is_add_increment::Int
 end
 
+
+function _show(x::Parameter, field)
+    if field == :is_measured
+        return getfield(x, field) ? "1 (measured)" : "0 (derivable)"
+    elseif field == :is_error
+        return getfield(x, field) ? "1 (error parameter)" : "0"
+    elseif field == :is_sure
+        return getfield(x, field) ? "1 (found for every record)" : "0 (not found for every record)"
+    else
+        return getfield(x, field)
+    end
+end
+
 """
     Parameter
 
@@ -23,15 +36,6 @@ A struct that encapsulates information about a Madrigal parameter.
 Similar to the `MadrigalParameter` class in the madrigalWeb python module.
 """
 Parameter
-
-function Base.show(io::IO, ::MIME"text/plain", param::Parameter)
-    println(io, "Parameter(")
-    for field in fieldnames(Parameter)
-        println(io, "  $(field): $(getfield(param, field))")
-    end
-    return print(io, ")")
-end
-
 
 """
     get_experiment_file_parameters(file, url)

@@ -71,11 +71,20 @@ end
 end
 
 @testitem "show" begin
-    using Madrigal: ExperimentFile
-    expfile = ExperimentFile("name", 1, "desc", 3, "final", true, "doi", 1)
+    using Madrigal: ExperimentFile, Parameter
+
     io = IOBuffer()
+
+    expfile = ExperimentFile("name", 1, "desc", 3, "final", true, "doi", 1)
     show(io, MIME("text/plain"), expfile)
     s = String(take!(io))
     @test occursin("3 (history)", s)
     @test occursin("1 (private)", s)
+
+    param = Parameter("mnemonic", "desc", true, "units", true, "category", true, -1)
+    show(io, MIME("text/plain"), param)
+    s = String(take!(io))
+    @test occursin("1 (measured)", s)
+    @test occursin("1 (error parameter)", s)
+    @test occursin("1 (found for every record)", s)
 end

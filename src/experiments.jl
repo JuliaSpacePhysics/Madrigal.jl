@@ -1,7 +1,7 @@
 @concrete terse struct ExperimentFile <: AbstractMadrigalObject
     name
     kindat::Int
-    desc
+    description
     "category code (1=default, 2=variant, 3=history, 4=real-time)"
     category::Int
     "'preliminary', 'final', or any other description"
