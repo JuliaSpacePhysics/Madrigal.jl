@@ -1,14 +1,15 @@
 ```@meta
-CurrentModule = MadrigalWeb
+CurrentModule = Madrigal
 ```
 
-# MadrigalWeb
+# Madrigal
 
-Documentation for [MadrigalWeb](https://github.com/Beforerr/MadrigalWeb.jl).
+Documentation for [Madrigal](https://github.com/juliaspacephysics/Madrigal.jl).
 
 ```@index
+
 ```
 
 ```@autodocs
-Modules = [MadrigalWeb]
+Modules = [Madrigal]
 ```

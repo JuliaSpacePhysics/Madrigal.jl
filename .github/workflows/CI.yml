@@ -74,6 +74,6 @@ jobs:
         shell: julia --project=docs --color=yes {0}
         run: |
           using Documenter: DocMeta, doctest
-          using MadrigalWeb
-          DocMeta.setdocmeta!(MadrigalWeb, :DocTestSetup, :(using MadrigalWeb); recursive=true)
-          doctest(MadrigalWeb)
+          using Madrigal
+          DocMeta.setdocmeta!(Madrigal, :DocTestSetup, :(using Madrigal); recursive=true)
+          doctest(Madrigal)
