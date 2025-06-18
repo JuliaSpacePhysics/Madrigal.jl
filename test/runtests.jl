@@ -47,3 +47,13 @@ end
     @test mlh.mnemonic == "mlh"
     @test mlh.code == 30
 end
+
+@testitem "show" begin
+    using Madrigal: ExperimentFile
+    expfile = ExperimentFile("name", 1, "desc", 3, "final", true, "doi", 1)
+    io = IOBuffer()
+    show(io, MIME("text/plain"), expfile)
+    s = String(take!(io))
+    @test occursin("3 (history)", s)
+    @test occursin("1 (private)", s)
+end
