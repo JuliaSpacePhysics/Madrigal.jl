@@ -19,24 +19,13 @@ function get_all_instruments(url)
     url = rstrip(url, '/') * "/" * script_name
 
     response = HTTP.get(url)
-
-    if response.status != 200
-        error("Failed to get instruments: HTTP status $(response.status)")
-    end
-
-    body = String(response.body)
-    # Check for errors in the response
-    occursin("Error occurred", body) && error("Error from server: $url")
-
-    lines = filter!(!isempty, split(body, "\n"))
+    lines = process_response(response)
     # Parse the result into Instrument objects
     instruments = Instrument[]
 
     for line in lines
         parts = split(line, ",")
-        if length(parts) < 5
-            continue
-        end
+        length(parts) < 6 && continue
 
         # Extract the category if available
         category = length(parts) > 6 ? parts[7] : "unknown"

@@ -64,9 +64,7 @@ function get_experiment_file_parameters(file, server = Default_server[])
 
     for line in lines
         parts = split(line, "\\")
-        if length(parts) < 7
-            continue
-        end
+        length(parts) < 7 && continue
 
         # Extract the isAddIncrement if available
         is_add_increment = length(parts) > 7 ? parse(Int, parts[8]) : -1
