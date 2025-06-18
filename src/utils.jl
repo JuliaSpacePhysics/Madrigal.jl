@@ -6,9 +6,7 @@ decompose_datetime(t) = decompose_datetime(DateTime(t))
 
 
 function process_response(response::HTTP.Response)
-    if response.status != 200
-        error("Failed to get parameters: HTTP status $(response.status)")
-    end
+    response.status != 200 && error("Failed to get parameters: HTTP status $(response.status)")
     body = String(response.body)
     # Check for errors in the response
     occursin("Error occurred", body) && error("Error with request: $(response.request)")
