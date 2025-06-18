@@ -1,23 +1,25 @@
-using MadrigalWeb
+using Madrigal
 using Documenter
 
-DocMeta.setdocmeta!(MadrigalWeb, :DocTestSetup, :(using MadrigalWeb); recursive=true)
+DocMeta.setdocmeta!(Madrigal, :DocTestSetup, :(using Madrigal); recursive = true)
 
 makedocs(;
-    modules=[MadrigalWeb],
-    authors="Beforerr <zzj956959688@gmail.com> and contributors",
-    sitename="MadrigalWeb.jl",
-    format=Documenter.HTML(;
-        canonical="https://Beforerr.github.io/MadrigalWeb.jl",
-        edit_link="main",
-        assets=String[],
+    modules = [Madrigal],
+    authors = "Beforerr <zzj956959688@gmail.com> and contributors",
+    sitename = "Madrigal.jl",
+    format = Documenter.HTML(;
+        canonical = "https://juliaspacephysics.github.io/Madrigal.jl",
+        edit_link = "main",
+        assets = String[],
     ),
-    pages=[
+    pages = [
         "Home" => "index.md",
     ],
+    doctest = true
 )
 
 deploydocs(;
-    repo="github.com/Beforerr/MadrigalWeb.jl",
-    devbranch="main",
+    repo = "github.com/juliaspacephysics/Madrigal.jl",
+    devbranch = "main",
+    push_preview = true,
 )

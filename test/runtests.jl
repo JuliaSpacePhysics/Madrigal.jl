@@ -4,9 +4,8 @@ using TestItems, TestItemRunner
 
 @run_package_tests filter = ti -> !(:skipci in ti.tags)
 
-@testitem "MadrigalWeb.jl" begin
-    # Write your tests here.
-    using MadrigalWeb.Dates
+@testitem "Madrigal.jl" begin
+    using Madrigal.Dates
     kinst = 30
     kindat = 3408
     tstart = Date(1998, 1, 19)

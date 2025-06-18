@@ -1,4 +1,4 @@
-module MadrigalWeb
+module Madrigal
 using Dates
 using TOML
 using HTTP
@@ -14,9 +14,9 @@ include("parameters.jl")
 const Default_url = Ref("https://cedar.openmadrigal.org/")
 const Default_server = Ref{Server}(Server("https://cedar.openmadrigal.org/"))
 const Default_dir = Ref{String}()
-const User_name = Ref("MadrigalWeb.jl")
+const User_name = Ref("Madrigal.jl")
 const User_email = Ref("")
-const User_affiliation = Ref("MadrigalWeb.jl")
+const User_affiliation = Ref("Madrigal.jl")
 
 export filter_by_kindat
 export get_all_instruments
