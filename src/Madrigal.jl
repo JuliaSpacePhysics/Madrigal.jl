@@ -68,10 +68,6 @@ function set_default_user(name, email, affiliation = nothing)
     return isnothing(affiliation) || (User_affiliation[] = affiliation)
 end
 
-
-_compat(x::DateTime) = x
-_compat(x::String) = DateTime(x)
-
 get_kindat(exp) = exp.kindat
 get_kindatdesc(exp) = exp.kindatdesc
 

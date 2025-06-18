@@ -34,6 +34,28 @@ using TestItems, TestItemRunner
     @test !isempty(param.category)
 end
 
+@testitem "Configuration" begin
+    using Madrigal.TOML
+    url = "http://millstonehill.haystack.mit.edu"
+    @test_nowarn Madrigal.set_default_server(url)
+    @test String(Madrigal.Default_server[]) == url
+
+    @test_nowarn Madrigal.set_default_user("Your Name", "your.email@example.com", "Your Institution")
+    @test Madrigal.User_name[] == "Your Name"
+    @test Madrigal.User_email[] == "your.email@example.com"
+    @test Madrigal.User_affiliation[] == "Your Institution"
+
+    toml_cfg = """
+    url = "https://cedar.openmadrigal.org"
+    user_name = "xxx"
+    """
+
+    config = TOML.parse(toml_cfg)
+    @test_nowarn Madrigal.set_default_from_config!(config)
+    @test String(Madrigal.Default_server[]) == "https://cedar.openmadrigal.org"
+    @test Madrigal.User_name[] == "xxx"
+end
+
 
 @testitem "Instruments" begin
     # Test getting all instruments from the default server
