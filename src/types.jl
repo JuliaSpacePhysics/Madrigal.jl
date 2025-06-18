@@ -4,6 +4,8 @@ struct Server
     url::String
 end
 
+Base.String(server::Server) = server.url
+
 """
 A class that encapsulates information about a Madrigal Experiment.
 
