@@ -2,7 +2,11 @@
 
 A Julia API to access the Madrigal database.
 
-Reference:
+## Information
+
+> Madrigal data are arranged into "experiments", which may contain data files, images, documentation, links, etc.
+
+## References
 
 - [Madrigal Database Documentation](https://cedar.openmadrigal.org/docs/name/madContents.html)
 - [madrigalWeb](https://github.com/MITHaystack/madrigalWeb): a python API to access the Madrigal database
