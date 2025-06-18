@@ -15,6 +15,17 @@ end
 Base.basename(exp::ExperimentFile) = basename(exp.name)
 Base.String(exp::ExperimentFile) = exp.name
 
+function _show(x::ExperimentFile, field)
+    if field == :category
+        cat = getfield(x, field)
+        category_codes = (:default, :variant, :history, :real_time)
+        return "$cat ($(category_codes[cat]))"
+    elseif field == :permission
+        return getfield(x, field) ? "1 (private)" : "0 (public)"
+    else
+        return getfield(x, field)
+    end
+end
 
 function get_experiments(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
     query = (; code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)

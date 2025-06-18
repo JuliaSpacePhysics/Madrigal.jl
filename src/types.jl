@@ -43,7 +43,9 @@ end
 function Base.show(io::IO, ::MIME"text/plain", x::T) where {T <: AbstractMadrigalObject}
     println(io, "$T(")
     for field in fieldnames(T)
-        println(io, "  $(field): $(getfield(x, field))")
+        println(io, "  $(field): ", _show(x, field))
     end
     return print(io, ")")
 end
+
+@inline _show(x, field) = getfield(x, field)
