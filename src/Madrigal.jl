@@ -44,12 +44,17 @@ get_url(server::Server) = server.url
 
 set_ref!(ref, c, key) = haskey(c, key) && (ref[] = c[key])
 
+function parse_dir(dir)
+    startswith(dir, "~") && (dir = replace(dir, "~" => homedir(), count=1))
+    return dir
+end
+
 function set_default_from_config!(c)
     haskey(c, "url") && begin
         Default_url[] = c["url"]
         Default_server[] = Server(c["url"])
     end
-    set_ref!(Default_dir, c, "dir")
+    haskey(c, "dir") && (Default_dir[] = parse_dir(c["dir"]))
     set_ref!(User_name, c, "user_name")
     set_ref!(User_email, c, "user_email")
     return set_ref!(User_affiliation, c, "user_affiliation")
