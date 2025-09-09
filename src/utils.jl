@@ -1,14 +1,13 @@
+get_url(url; clean = true) = clean ? rstrip(url, '/') : url
+get_url(server::Server; kw...) = get_url(server.url; kw...)
+
+@memoize function cached_get(url; kw...)
+    response = HTTP.get(url; kw...)
+    return IOBuffer(response.body)
+end
+
 function decompose_datetime(t::DateTime)
     return year(t), month(t), day(t), hour(t), minute(t), second(t)
 end
 
 decompose_datetime(t) = decompose_datetime(DateTime(t))
-
-
-function process_response(response::HTTP.Response)
-    response.status != 200 && error("Failed to get parameters: HTTP status $(response.status)")
-    body = String(response.body)
-    # Check for errors in the response
-    occursin("Error occurred", body) && error("Error with request: $(response.request)")
-    return filter!(!isempty, split(body, "\n"))
-end
