@@ -52,37 +52,12 @@ parameters = get_experiment_file_parameters(file)
 
 Similar to the `getExperimentFileParameters` method in the madrigalWeb python module.
 """
-function get_experiment_file_parameters(file, server = Default_server[])
-    script_name = "getParametersService.py"
-    url = rstrip(get_url(server), '/') * "/" * script_name
-    query = Dict("filename" => String(file))
+function get_experiment_file_parameters(file; server = Default_server[])
+    url = get_url(server) * "/getParametersService.py"
+    query = (; filename = filename(file))
     response = HTTP.get(url; query)
-    lines = process_response(response)
 
-    # Parse the result into Parameter objects
-    parameters = Parameter[]
-
-    for line in lines
-        parts = split(line, "\\")
-        length(parts) < 7 && continue
-
-        # Extract the isAddIncrement if available
-        is_add_increment = length(parts) > 7 ? parse(Int, parts[8]) : -1
-
-        # Create a Parameter object
-        parameter = Parameter(
-            parts[1],                # mnemonic
-            parts[2],                # description
-            parse(Bool, parts[3]),    # is_error
-            parts[4],                # units
-            parse(Bool, parts[5]),    # is_measured
-            parts[6],                # category
-            parse(Bool, parts[7]),    # is_sure
-            is_add_increment         # is_add_increment
-        )
-
-        push!(parameters, parameter)
-    end
-
-    return parameters
+    header = [:mnemonic, :description, :is_error, :units, :is_measured, :category, :is_sure, :is_add_increment]
+    types = IdDict(:is_error => Bool, :is_measured => Bool, :is_sure => Bool)
+    return CSV.File(response.body; header, types, stringtype = PosLenString, delim = '\\')
 end

@@ -15,17 +15,38 @@ end
     kindat = 3408
     tstart = Date(1998, 1, 19)
     tend = Date(1998, 12, 31)
+
+    # Test getting metadata
+    sites = get_metadata(:sites)
+    @test length(sites) > 1
+
+
+    # Test getting instruments
+    insts = get_instruments()
+    @test length(insts) > 1
+    @test length(insts) == length(get_instruments(source = :web))
+    @test (@allocations get_instruments()) <= 2 # Cached
+    # Test for Millstone Hill which should always be in the database and that instrument fields are properly populated
+    mlh = first(filter(i -> i.kinst == 30, insts))
+    @test mlh.name == "Millstone Hill IS Radar"
+    @test mlh.mnemonic == "mlh"
+    @test mlh.kinst == 30
+
+    # Test getting experiments
     exps = get_experiments(kinst, tstart, tend)
     @test length(exps) > 1
+    @test length(exps) == length(get_experiments(kinst, tstart, tend, source = :web))
+    @test (@allocations get_experiments()) <= 2 # Cached
 
     exp = exps[1]
     files = get_experiment_files(exp)
+    web_files = get_experiment_files(exp, source = :web)
     @test length(files) > 1
-
-    file = filter_by_kindat(files, kindat)[1]
-    @test file.kindat == kindat
+    @test length(files) == length(web_files)
+    @test (@timed get_experiment_files(exp)).time < 0.1
 
     # Test downloading files
+    file = files[1]
     @test download_file(file) !== nothing
     @test download_files(kinst, kindat, "1998-01-18", "1998-01-22") !== nothing
 
@@ -37,6 +58,15 @@ end
     @test !isempty(param.mnemonic)
     @test !isempty(param.description)
     @test !isempty(param.category)
+
+    # Test type conversion
+    Madrigal.Instrument(mlh)
+    Madrigal.Experiment(exp)
+    Madrigal.ExperimentFile(file)
+    Madrigal.ExperimentFile(web_files[1])
+
+    # Test clearing cache
+    clear_metadata_cache!()
 end
 
 @testitem "Configuration" begin
@@ -61,26 +91,12 @@ end
     @test Madrigal.User_name[] == "xxx"
 end
 
-
-@testitem "Instruments" begin
-    # Test getting all instruments from the default server
-    instruments = get_all_instruments()
-    # Check that we got some instruments
-    @test length(instruments) > 0
-
-    # Test for Millstone Hill which should always be in the database and that instrument fields are properly populated
-    mlh = first(filter(i -> i.code == 30, instruments))
-    @test mlh.name == "Millstone Hill IS Radar"
-    @test mlh.mnemonic == "mlh"
-    @test mlh.code == 30
-end
-
 @testitem "show" begin
     using Madrigal: ExperimentFile, Parameter
 
     io = IOBuffer()
 
-    expfile = ExperimentFile("name", 1, "desc", 3, "final", true, "doi", 1)
+    expfile = ExperimentFile("name", "filename", 1, 3, "final", true)
     show(io, MIME("text/plain"), expfile)
     s = String(take!(io))
     @test occursin("3 (history)", s)

@@ -1,50 +1,70 @@
 """
-    get_all_instruments(url)
-    get_all_instruments(server::Server = Default_server[])
+    Instrument
 
-Returns a list of all Madrigal instruments at the given Madrigal site `url` or `server`.
+A struct that encapsulates information about a Madrigal Instrument.
+
+Similar to the `MadrigalInstrument` class in the madrigalWeb python module.
+"""
+
+@concrete terse struct Instrument{T} <: AbstractMadrigalObject
+    "Instrument id"
+    kinst::Int
+    name
+    "Three-character mnemonic"
+    mnemonic
+    latitude::T
+    longitude::T
+    altitude::T
+    category
+end
+
+kinst(r::CSV.Row) = r.kinst
+
+Instrument(r::CSV.Row) = Instrument(kinst(r), r.name, r.mnemonic, r.latitude, r.longitude, r.altitude, r.category)
+
+
+"""
+    get_instruments(server = Default_server[]; source = :cache)
+
+Returns all Madrigal instruments from the `server`.
+
+By default uses cached metadata for faster access. Set `source=:web` for direct web service access.
 
 # Examples
 ```julia
-# Get all instruments from the default server
-instruments = get_all_instruments()
+# Get all instruments using cached metadata (fast)
+get_instruments()
 
-# Get all instruments from a specific server
-server = Server("https://cedar.openmadrigal.org")
-instruments = get_all_instruments(server)
+# Get all instruments using web service (up-to-date but slower)
+get_instruments(source=:web)
 ```
 """
-function get_all_instruments(url)
-    script_name = "getInstrumentsService.py"
-    url = rstrip(url, '/') * "/" * script_name
-
-    response = HTTP.get(url)
-    lines = process_response(response)
-    # Parse the result into Instrument objects
-    instruments = Instrument[]
-
-    for line in lines
-        parts = split(line, ",")
-        length(parts) < 6 && continue
-
-        # Extract the category if available
-        category = length(parts) > 6 ? parts[7] : "unknown"
-
-        # Create an Instrument object
-        instrument = Instrument(
-            parts[1],                # name
-            parse(Int, parts[2]),     # code
-            parts[3],                # mnemonic
-            parse(Float64, parts[4]), # latitude
-            parse(Float64, parts[5]), # longitude
-            parse(Float64, parts[6]), # altitude
-            category                  # category
-        )
-
-        push!(instruments, instrument)
+function get_instruments(server = Default_server[]; source = :cache, kw...)
+    @assert source in (:web, :cache)
+    server_url = get_url(server)
+    if source == :web
+        return get_instruments_web_service(server_url)
+    else
+        return get_instruments_cached(server_url; kw...)
     end
-
-    return instruments
 end
 
-get_all_instruments(server::Server = Default_server[]) = get_all_instruments(get_url(server))
+function get_instruments_web_service(server)
+    url = server * "/getInstrumentsService.py"
+    response = HTTP.get(url)
+    header = [:name, :kinst, :mnemonic, :latitude, :longitude, :altitude, :category, :pi_name, :pi_email]
+    return CSV.File(response.body; header, stringtype = PosLenString)
+end
+
+function get_instruments_cached(server; update = false)
+    update && empty_cache!(_get_instruments_cached)
+    return _get_instruments_cached(server)
+end
+
+@memoize function _get_instruments_cached(server)
+    fileType = METADATA_TYPES[:instruments]
+    url = server * "/getMetadata?fileType=$fileType"
+    data = cached_get(url)
+    header = [:kinst, :mnemonic, :name, :latitude, :longitude, :altitude, :contact, :contactAddr1, :contactAddr2, :contactAddr3, :contactCity, :contactState, :contactZip, :contactCountry, :contactPhone, :contactEmail, :category]
+    return CSV.File(data; header, stringtype = PosLenString)
+end

@@ -13,24 +13,47 @@ A Julia API to access the [Madrigal database](https://cedar.openmadrigal.org/): 
 using Madrigal
 using Dates
 
-insts = get_all_instruments()
+# Get instruments (fast cached access by default)
+insts = get_instruments()
 
 kinst = 30 # "Millstone Hill IS Radar"
 kindat = 3408 # "Combined basic parameters file - all antennas and modes"
 tstart = Date(1998, 1, 19)
 tend = Date(1998, 12, 31)
 
+# Get experiments (cached by default, use source=:web for latest data)
 exps = get_experiments(kinst, tstart, tend)
 files = get_experiment_files(exps[1])
-file = filter_by_kindat(files, kindat)[1]
+file = filter(f -> f.kindat == kindat, files)[1]
 params = get_experiment_file_parameters(file)
 path = download_file(file)
 ```
 
-You can also download files given the instrument id (`kinst`), kind of data file code (`kindat`), and time range `tstart` to `tend`. See [Madrigal instrument metadata](https://cedar.openmadrigal.org/instMetadata) for a list of `kinst` and [Madrigal site metadata](https://cedar.openmadrigal.org/kindatMetadata) for a list of `kindat`.
+You can also query / download files given the instrument id (`kinst`), kind of data file code (`kindat`), and time range `tstart` to `tend`. See [Madrigal instrument metadata](https://cedar.openmadrigal.org/instMetadata) for a list of `kinst` and [Madrigal site metadata](https://cedar.openmadrigal.org/kindatMetadata) for a list of `kindat`.
 
 ```julia
+get_instrument_files(kinst, tstart, tend)
+files = get_instrument_files(kinst, kindat, tstart, tend)
+download_file.(files)
+# or
 download_files(kinst, kindat, "1998-01-18", "1998-01-22")
+```
+
+## Data Access
+
+`Madrigal.jl` provides two data access methods:
+
+- **Cached (default)**: Fast access using cached metadata files (the metadata files are downloaded, parsed, and cached on first use)
+- **Web service**: Live access to latest data
+
+```julia
+# Fast cached access (default)
+get_instruments()
+get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31))
+
+# Alternative via web service
+get_instruments(source=:web) 
+get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31), source=:web)
 ```
 
 ## Configuration Options
