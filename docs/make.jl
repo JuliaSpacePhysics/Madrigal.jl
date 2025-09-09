@@ -9,8 +9,6 @@ makedocs(;
     sitename = "Madrigal.jl",
     format = Documenter.HTML(;
         canonical = "https://juliaspacephysics.github.io/Madrigal.jl",
-        edit_link = "main",
-        assets = String[],
     ),
     pages = [
         "Home" => "index.md",
@@ -19,7 +17,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo = "github.com/juliaspacephysics/Madrigal.jl",
+    repo = "github.com/JuliaSpacePhysics/Madrigal.jl",
     devbranch = "main",
     push_preview = true,
 )
