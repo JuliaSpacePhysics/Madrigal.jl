@@ -8,6 +8,7 @@ makedocs(;
     authors = "Beforerr <zzj956959688@gmail.com> and contributors",
     sitename = "Madrigal.jl",
     format = Documenter.HTML(;
+        size_threshold = nothing,
         canonical = "https://juliaspacephysics.github.io/Madrigal.jl",
     ),
     pages = [

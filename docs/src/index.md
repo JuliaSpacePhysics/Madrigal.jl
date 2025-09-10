@@ -14,22 +14,40 @@ A Julia API to access the [Madrigal database](https://cedar.openmadrigal.org/): 
 
 ## Quickstart
 
-```@example
+```@setup quickstart
+using PrettyTables.Tables: columns, columnnames
+
+# Helper function for creating scrollable HTML tables
+function scrollable_table(data; kwargs...)
+    column_labels = columnnames(columns(data)) |> collect
+    table_html = pretty_table(String, data; backend = :html,
+        maximum_column_width="10", column_labels, kwargs...)
+    """<div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
+    $table_html
+    </div>""" |> Base.HTML
+end
+```
+
+```@example quickstart
 using Madrigal
 using Dates
 using PrettyTables
 
 # Get instruments
 instruments = get_instruments()
-pretty_table(instruments)
+scrollable_table(instruments)
+```
 
+```@example quickstart
 # Get experiments for Millstone Hill radar in 2020
 experiments = get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31))
-pretty_table(experiments)
+scrollable_table(experiments)
+```
 
+```@example quickstart
 # Get files for an experiment
 files = get_experiment_files(experiments[1])
-pretty_table(files)
+scrollable_table(files)
 ```
 
 ## Data Access
