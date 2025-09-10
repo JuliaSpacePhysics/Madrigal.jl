@@ -18,6 +18,7 @@ end
 
     # Test getting metadata
     sites = get_metadata(:sites)
+    get_metadata(:sites) # test cached_get
     @test length(sites) > 1
 
 
