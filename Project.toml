@@ -1,6 +1,6 @@
 name = "Madrigal"
 uuid = "30ac0af5-7056-44d2-a45c-266d747295e6"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Beforerr <zzj956959688@gmail.com> and contributors"]
 
 [deps]
