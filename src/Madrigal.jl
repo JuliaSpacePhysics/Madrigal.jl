@@ -47,14 +47,14 @@ end
 Get all experiment files for a given instrument code `kinst` and time range `t0` to `t1`, optionally filtered by data code `kindat`.
 """
 function get_instrument_files(kinst, t0, t1; server = Default_server[])
-    return mapreduce(vcat, get_experiments(kinst, t0, t1; server)) do exp
-        get_experiment_files(exp; server)
-    end
+    exps = get_experiments(kinst, t0, t1; server)
+    exp_ids = Set(exp.id for exp in exps)
+    return get_experiment_files_cached(server, exp_ids)
 end
 
 function get_instrument_files(kinst, kindat, t0, t1; server = Default_server[])
     files = get_instrument_files(kinst, t0, t1; server)
-    return filter!(f -> f.kindat in kindat, files)
+    return filter(f -> f.kindat in kindat, files)
 end
 
 end
