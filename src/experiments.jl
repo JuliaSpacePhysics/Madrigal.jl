@@ -38,7 +38,7 @@ function get_experiments(code, t0 = DateTime(1950, 1, 1), t1 = Dates.now(); serv
     if source == :web
         return get_experiments_web_service(server_url, code, t0, t1)
     else
-        return get_experiments_cached(server_url, code, t0, t1; kw...)
+        return get_experiments_cached(server, code, t0, t1; kw...)
     end
 end
 
@@ -59,9 +59,9 @@ function get_experiments_web_service(server, code, startyear, startmonth, startd
     return CSV.File(response.body; header, stringtype = PosLenString)
 end
 
-function get_experiments_cached(server; update = false)
+function get_experiments_cached(server = Default_server[]; update = false)
     update && empty_cache!(_get_experiments_cached)
-    return _get_experiments_cached(server)
+    return _get_experiments_cached(get_url(server))
 end
 
 function get_experiments_cached(server, kinst, t0, t1; kw...)

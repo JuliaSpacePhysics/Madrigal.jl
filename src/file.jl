@@ -97,14 +97,15 @@ function get_experiment_files_web_service(server, id; getNonDefault = false)
     return CSV.File(response.body; header, types, stringtype = PosLenString)
 end
 
-function get_experiment_files_cached(server; update = false)
+function get_experiment_files_cached(server = Default_server[]; update = false)
     update && empty_cache!(_get_files_cached)
     return _get_files_cached(get_url(server))
 end
 
 function get_experiment_files_cached(server, id; kw...)
     files = get_experiment_files_cached(server; kw...)
-    return files[files.id .== id]
+    return @views files[∈(id).(files.id)]
+    # return @views files[files.id .∈ (id,)] # this is slower but consumes less memory
 end
 
 @memoize function _get_files_cached(server)

@@ -5,9 +5,7 @@ Download files for a given instrument code `inst`, data code `kindat`, and time 
 """
 function download_files(inst, kindat, t0, t1; server = Default_server[], kws...)
     files = get_instrument_files(inst, kindat, t0, t1; server)
-    return map(files) do file
-        download_file(file; server, kws...)
-    end
+    return download_file.(files; server, kws...)
 end
 
 const fileTypes = Dict(:hdf5 => -2, :simple => -1, :netCDF4 => -3)
@@ -25,7 +23,7 @@ function download_file(
         file, destination = nothing;
         dir = Default_dir[], format = :hdf5, server = Default_server[],
         name = User_name[], email = User_email[], affiliation = User_affiliation[],
-        verbose = false, throw = false
+        verbose = false, throw = false, download = (;)
     )
     mkpath(dir)
     path = @something destination joinpath(dir, _basename(file))
@@ -42,7 +40,7 @@ function download_file(
         )
         url = get_url(server) * "/getMadfile.cgi"
         try
-            HTTP.download(url, path; query)
+            HTTP.download(url, path; query, download...)
         catch e
             @warn "Failed to download file: $(sprint(showerror, e))"
             isfile(path) && rm(path)
