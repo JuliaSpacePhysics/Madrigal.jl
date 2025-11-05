@@ -29,7 +29,7 @@ params = get_experiment_file_parameters(file)
 path = download_file(file)
 ```
 
-You can also query / download files given the instrument id (`kinst`), kind of data file code (`kindat`), and time range `tstart` to `tend`. See [Madrigal instrument metadata](https://cedar.openmadrigal.org/instMetadata) for a list of `kinst` and [Madrigal site metadata](https://cedar.openmadrigal.org/kindatMetadata) for a list of `kindat`.
+You can also query / download files given the instrument id (`kinst`), kind of data file code (`kindat`), and time range `tstart` to `tend`. See [Madrigal instrument metadata](https://cedar.openmadrigal.org/instMetadata) for a list of `kinst` and [Madrigal kind of data file types metadata](https://cedar.openmadrigal.org/kindatMetadata) for a list of `kindat`.
 
 ```julia
 get_instrument_files(kinst, tstart, tend)

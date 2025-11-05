@@ -1,10 +1,10 @@
 """
     download_files(inst, kindat, t0, t1; kws...)
 
-Download files for a given instrument code `inst`, data code `kindat`, and time range `t0` to `t1`.
+Download files for a given instrument `inst`, data code `kindat`, and time range `t0` to `t1`.
 """
 function download_files(inst, kindat, t0, t1; server = Default_server[], kws...)
-    files = get_instrument_files(inst, kindat, t0, t1; server)
+    files = get_instrument_files(kinst(inst), kindat, t0, t1; server)
     return download_file.(files; server, kws...)
 end
 

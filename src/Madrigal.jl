@@ -10,6 +10,7 @@ import Base: getproperty
 
 include("types.jl")
 include("utils.jl")
+include("name_mapping.jl")
 include("instruments.jl")
 include("experiments.jl")
 include("file.jl")
@@ -42,19 +43,19 @@ function __init__()
 end
 
 """
-    get_instrument_files(kinst, [kindat], t0, t1; server = Default_server[])
+    get_instrument_files(inst, [kindat], t0, t1; server = Default_server[])
 
-Get all experiment files for a given instrument code `kinst` and time range `t0` to `t1`, optionally filtered by data code `kindat`.
+Get all experiment files for a given instrument `inst` (code or common name) and time range `t0` to `t1`, optionally filtered by data code `kindat`.
 """
-function get_instrument_files(kinst, t0, t1; server = Default_server[])
-    exps = get_experiments(kinst, t0, t1; server)
+function get_instrument_files(inst, t0, t1; server = Default_server[])
+    exps = get_experiments(kinst(inst), t0, t1; server)
     exp_ids = Set(exp.id for exp in exps)
     return get_experiment_files_cached(server, exp_ids)
 end
 
 function get_instrument_files(kinst, kindat, t0, t1; server = Default_server[])
     files = get_instrument_files(kinst, t0, t1; server)
-    return filter(f -> f.kindat in kindat, files)
+    return isempty(files) ? files : filter(f -> f.kindat in kindat, files)
 end
 
 end
