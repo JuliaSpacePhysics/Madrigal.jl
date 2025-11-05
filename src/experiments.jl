@@ -35,10 +35,10 @@ function get_experiments(code, t0 = DateTime(1950, 1, 1), t1 = Dates.now(); serv
     server_url = get_url(server)
     t0 = DateTime(t0)
     t1 = DateTime(t1)
-    if source == :web
-        return get_experiments_web_service(server_url, code, t0, t1)
+    return if source == :web
+        get_experiments_web_service(server_url, kinst(code), t0, t1)
     else
-        return get_experiments_cached(server, code, t0, t1; kw...)
+        get_experiments_cached(server, kinst(code), t0, t1; kw...)
     end
 end
 
@@ -65,8 +65,6 @@ function get_experiments_cached(server = Default_server[]; update = false)
 end
 
 function get_experiments_cached(server, kinst, t0, t1; kw...)
-    kinst = kinst isa String ? parse(Int, kinst) : kinst
-
     # Filter by instrument and date range
     exps = get_experiments_cached(server; kw...)
     valid_idxs = @. exps.kinst == kinst && exps.start_date <= t1 && exps.end_date >= t0

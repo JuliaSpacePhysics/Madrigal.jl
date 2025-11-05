@@ -1,3 +1,5 @@
+import Pkg
+Pkg.resolve()
 @time using Madrigal
 using Dates
 using Chairmarks

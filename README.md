@@ -1,11 +1,14 @@
 # Madrigal.jl
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaspacephysics.github.io/Madrigal.jl/dev/)
 [![Build Status](https://github.com/juliaspacephysics/Madrigal.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/juliaspacephysics/Madrigal.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/juliaspacephysics/Madrigal.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/juliaspacephysics/Madrigal.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 A Julia API to access the [Madrigal database](https://cedar.openmadrigal.org/): an upper atmospheric science database.
+
+**Installation**: at the Julia REPL, run `using Pkg; Pkg.add("Madrigal")`
+
+**Documentation**: [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaSpacePhysics.github.io/Madrigal.jl/dev/)
 
 ## Examples
 

@@ -23,16 +23,16 @@ function download_file(
         file, destination = nothing;
         dir = Default_dir[], format = :hdf5, server = Default_server[],
         name = User_name[], email = User_email[], affiliation = User_affiliation[],
-        verbose = false, throw = false, download = (;)
+        throw = false, download = (;), force = false
     )
     mkpath(dir)
     path = @something destination joinpath(dir, _basename(file))
-    if isfile(path)
+    if isfile(path) && !force
         return path
     else
         fileType = get(fileTypes, format, 4)
         query = (;
-            fileName = filename(file),
+            fileName = filename(file; server),
             fileType = string(fileType),
             user_fullname = name,
             user_email = email,
