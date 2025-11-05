@@ -10,7 +10,7 @@
     permission
 end
 
-filename(r) = hasproperty(r, :filename) ? r.filename : joinpath(getexpPath(r.id), r.name)
+filename(r; server) = hasproperty(r, :filename) ? r.filename : joinpath(getexpPath(r.id; server), r.name)
 
 Base.String(exp::ExperimentFile) = exp.name
 
@@ -33,7 +33,7 @@ function ExperimentFile(r::CSV.Row)
     )
 end
 
-getMadroot() = "/opt/openmadrigal/madroot/"
+getMadroot(server) = server != "http://madrigal.eiscat.se" ? "/opt/openmadrigal/madroot/" : "/opt/madrigal"
 
 function getexpPath(id; server = Default_server[])
     # Get experiment data to find the URL
@@ -44,7 +44,7 @@ function getexpPath(id; server = Default_server[])
     isnothing(madtoc_index) && throw(ArgumentError("Invalid experiment URL format: $(exp.url)"))
     # Get the relative path after /madtoc/
     relative_path = exp.url[(madtoc_index[end] + 1):end]
-    return joinpath(getMadroot(), relative_path)
+    return joinpath(getMadroot(server), relative_path)
 end
 
 function _show(x::ExperimentFile, field)
@@ -89,13 +89,16 @@ get_experiment_files(; server = Default_server[]) = get_experiment_files_cached(
 get_experiment_files(exp::Union{Experiment, CSV.Row}; kw...) = get_experiment_files(exp.id; kw...)
 
 # https://github.com/MITHaystack/openmadrigal/blob/main/madroot/source/madpy/scripts/bin/getExperimentFiles.py
-function get_experiment_files_web_service(server, id; getNonDefault = false)
+function get_experiment_files_web_service(server, id::Integer; getNonDefault = false)
     url = server * "/getExperimentFilesService.py"
     response = HTTP.get(url, query = (; id, getNonDefault))
     header = [:filename, :kindat, :description, :category, :status, :permission, :doi]
     types = IdDict(:permission => Bool)
     return CSV.File(response.body; header, types, stringtype = PosLenString)
 end
+
+get_experiment_files_web_service(server, ids; kw...) =
+    vcat(get_experiment_files_web_service.(server, ids; kw...)...)
 
 function get_experiment_files_cached(server = Default_server[]; update = false)
     update && empty_cache!(_get_files_cached)

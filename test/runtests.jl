@@ -10,7 +10,7 @@ using TestItems, TestItemRunner
 end
 
 @testitem "Madrigal.jl" begin
-    using Madrigal.Dates
+    using Dates
     kinst = 30
     kindat = 3408
     tstart = Date(1998, 1, 19)
@@ -38,6 +38,7 @@ end
     @test length(exps) > 1
     @test length(exps) == length(get_experiments(kinst, tstart, tend, source = :web))
     @test (@allocations get_experiments()) <= 2 # Cached
+    @test get_experiments(:mlh, tstart, tend) == exps
 
     exp = exps[1]
     files = get_experiment_files(exp)
@@ -68,6 +69,19 @@ end
 
     # Test clearing cache
     clear_metadata_cache!()
+end
+
+@testitem "EISCAT Server" begin
+    using Dates
+
+    server = "http://madrigal.eiscat.se"
+    kinst = 72
+    kindat = 6400
+    t0 = DateTime(2020, 12, 9, 18)
+    t1 = DateTime(2020, 12, 9, 23)
+    files = get_instrument_files(kinst, kindat, t0, t1; server)
+    @test length(files) > 0
+    @test download_file(files[1]; server) !== nothing
 end
 
 @testitem "Configuration" begin

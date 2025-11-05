@@ -10,7 +10,6 @@ import Base: getproperty
 
 include("types.jl")
 include("utils.jl")
-include("name_mapping.jl")
 include("instruments.jl")
 include("experiments.jl")
 include("file.jl")
@@ -18,6 +17,7 @@ include("parameters.jl")
 include("metadata.jl")
 include("conf.jl")
 include("download.jl")
+include("name_mapping.jl")
 
 export get_metadata
 export get_instruments
@@ -47,10 +47,10 @@ end
 
 Get all experiment files for a given instrument `inst` (code or common name) and time range `t0` to `t1`, optionally filtered by data code `kindat`.
 """
-function get_instrument_files(inst, t0, t1; server = Default_server[])
+function get_instrument_files(inst, t0, t1; server = Default_server[], kw...)
     exps = get_experiments(kinst(inst), t0, t1; server)
     exp_ids = Set(exp.id for exp in exps)
-    return get_experiment_files_cached(server, exp_ids)
+    return get_experiment_files(exp_ids; server, kw...)
 end
 
 function get_instrument_files(kinst, kindat, t0, t1; server = Default_server[])

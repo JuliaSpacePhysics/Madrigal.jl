@@ -12,6 +12,13 @@ A Julia API to access the [Madrigal database](https://cedar.openmadrigal.org/): 
 
 ```
 
+## Installation
+
+```julia
+using Pkg
+Pkg.add("Madrigal")
+```
+
 ## Quickstart
 
 ```@setup quickstart

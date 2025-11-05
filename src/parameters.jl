@@ -54,7 +54,7 @@ Similar to the `getExperimentFileParameters` method in the madrigalWeb python mo
 """
 function get_experiment_file_parameters(file; server = Default_server[])
     url = get_url(server) * "/getParametersService.py"
-    query = (; filename = filename(file))
+    query = (; filename = filename(file; server))
     response = HTTP.get(url; query)
 
     header = [:mnemonic, :description, :is_error, :units, :is_measured, :category, :is_sure, :is_add_increment]
