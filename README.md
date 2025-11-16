@@ -1,5 +1,7 @@
 # Madrigal.jl
 
+[![DOI](https://zenodo.org/badge/995104451.svg)](https://doi.org/10.5281/zenodo.15710129)
+
 [![Build Status](https://github.com/juliaspacephysics/Madrigal.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/juliaspacephysics/Madrigal.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/juliaspacephysics/Madrigal.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/juliaspacephysics/Madrigal.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
@@ -40,23 +42,6 @@ files = get_instrument_files(kinst, kindat, tstart, tend)
 download_file.(files)
 # or
 download_files(kinst, kindat, "1998-01-18", "1998-01-22")
-```
-
-## Data Access
-
-`Madrigal.jl` provides two data access methods:
-
-- **Cached (default)**: Fast access using cached metadata files (the metadata files are downloaded, parsed, and cached on first use)
-- **Web service**: Live access to latest data
-
-```julia
-# Fast cached access (default)
-get_instruments()
-get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31))
-
-# Alternative via web service
-get_instruments(source=:web) 
-get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31), source=:web)
 ```
 
 ## Notes

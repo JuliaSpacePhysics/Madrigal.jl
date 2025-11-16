@@ -2,9 +2,9 @@
 CurrentModule = Madrigal
 ```
 
-# Madrigal
+# Madrigal.jl
 
-Documentation for [Madrigal](https://github.com/juliaspacephysics/Madrigal.jl).
+[![DOI](https://zenodo.org/badge/995104451.svg)](https://doi.org/10.5281/zenodo.15710129)
 
 A Julia API to access the [Madrigal database](https://cedar.openmadrigal.org/): an upper atmospheric science database.
 
@@ -56,6 +56,9 @@ scrollable_table(experiments)
 files = get_experiment_files(experiments[1])
 scrollable_table(files)
 ```
+
+!!! note "Notes"
+    - See downstream packages like [EISCATData.jl](https://github.com/JuliaSpacePhysics/EISCATData.jl) and [DMSPData.jl](https://github.com/JuliaSpacePhysics/DMSPData.jl) for more examples of using `Madrigal.jl` for data access.
 
 ## Data Access
 
