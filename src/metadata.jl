@@ -1,14 +1,11 @@
 """
 Metadata access functions for direct access to OpenMadrigal consolidated metadata files.
-Ultra-fast access to experiments and files data without slow web services.
 
-# Notes
-Results are automatically cached based on server URL. Subsequent calls with the same server will return cached results instantly.
+Results are automatically cached based on server URL.
 
 # openmadrigal/madroot/source/madpy/djangoMad/madweb/templates/madweb/madrigal/metadata.m.html
 """
 
-# Metadata file type constants
 const METADATA_TYPES = Dict(
     :experiments => 0,    # expTab.txt
     :files => 1,         # fileTab.txt
@@ -47,10 +44,7 @@ end
 """
     clear_metadata_cache!()
 
-Clear all cached metadata results.
-
-This forces fresh data to be downloaded on the next call to metadata functions.
-Useful if you know the server data has been updated.
+Clear all cached metadata results. Useful when the server data has been updated.
 """
 function clear_metadata_cache!()
     Memoization.empty_cache!(_get_instruments_cached)

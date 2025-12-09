@@ -54,7 +54,7 @@ get_experiments_web_service(server, code, t0, t1) =
 function get_experiments_web_service(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
     query = (; code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
     url = server * "/getExperimentsService.py"
-    response = HTTP.get(url; query)
+    response = HTTP.get(url; query = _query(query))
     header = [:id, :url, :name, :site_id, :site_name, :kinst, :instname, :startyear, :startmonth, :startday, :starthour, :startmin, :startsec, :endyear, :endmonth, :endday, :endhour, :endmin, :endsec, :isLocal, :pi_name, :pi_email, :uttimestamp, :access]
     return CSV.File(response.body; header, stringtype = PosLenString)
 end
