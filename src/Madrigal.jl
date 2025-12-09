@@ -18,6 +18,7 @@ include("metadata.jl")
 include("conf.jl")
 include("download.jl")
 include("name_mapping.jl")
+# include("MadrigalHDF5Dataset/src/MadrigalHDF5Dataset.jl"); using .MadrigalHDF5Dataset
 
 export get_metadata
 export get_instruments
@@ -57,5 +58,14 @@ function get_instrument_files(kinst, kindat, t0, t1; server = Default_server[])
     files = get_instrument_files(kinst, t0, t1; server)
     return isempty(files) ? files : filter(f -> f.kindat in kindat, files)
 end
+
+function data_params end
+function exp_params end
+function exp_notes end
+function rec_layout end
+data_params(fid) = read(fid["Metadata/Data Parameters"])
+exp_params(fid) = read(fid["Metadata/Experiment Parameters"])
+exp_notes(fid) = read(fid["Metadata/Experiment Notes"])
+rec_layout(fid) = read(fid["Metadata/_record_layout"])
 
 end
