@@ -1,0 +1,8 @@
+{
+  "julia": "1.10",
+  "packages": {
+    "Madrigal": {
+      "uuid": "30ac0af5-7056-44d2-a45c-266d747295e6"
+    }
+  }
+}

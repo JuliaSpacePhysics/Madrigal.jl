@@ -10,6 +10,8 @@ A Julia API to access the [Madrigal database](https://cedar.openmadrigal.org/): 
 
 **Installation**: at the Julia REPL, run `using Pkg; Pkg.add("Madrigal")`
 
+For Python, see the wrapper in [`python/`](python/README.md) (PyPI: `madrigal-jl`).
+
 **Documentation**: [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaSpacePhysics.github.io/Madrigal.jl/dev/)
 
 ## Examples

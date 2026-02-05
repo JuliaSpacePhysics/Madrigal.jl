@@ -1,0 +1,41 @@
+[project]
+name = "madrigal-jl"
+version = "0.1.1"
+description = "Python wrapper for Madrigal.jl - access the Madrigal database via Julia"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+keywords = ["madrigal", "julia", "atmospheric-science", "ionosphere"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+dependencies = ["juliacall>=0.9.20"]
+
+[project.urls]
+Homepage = "https://github.com/JuliaSpacePhysics/Madrigal.jl"
+Repository = "https://github.com/JuliaSpacePhysics/Madrigal.jl"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.build]
+includes = ["src/madrigal"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+pdm = "*"
+
+[tool.pixi.pypi-dependencies]
+madrigal-jl = { path = ".", editable = true }
+pytest = "*"
+twine = "*"
+
+[tool.pixi.tasks]
+test = "pytest"

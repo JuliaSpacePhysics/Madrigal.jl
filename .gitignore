@@ -7,3 +7,9 @@ Manifest.toml
 .CondaPkg
 madrigalWeb
 openmadrigal
+__pycache__
+pixi.lock
+.pytest_cache# pixi environments
+.pixi/*
+!.pixi/config.toml
+python/dist
