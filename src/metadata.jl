@@ -1,6 +1,6 @@
 """
 Metadata access functions for direct access to OpenMadrigal consolidated metadata files.
-This provides ultra-fast access to experiments and files data without using the slow web services.
+Ultra-fast access to experiments and files data without slow web services.
 
 # Notes
 Results are automatically cached based on server URL. Subsequent calls with the same server will return cached results instantly.

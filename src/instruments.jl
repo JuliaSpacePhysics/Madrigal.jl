@@ -42,11 +42,9 @@ get_instruments(source=:web)
 function get_instruments(server = Default_server[]; source = :cache, kw...)
     @assert source in (:web, :cache)
     server_url = get_url(server)
-    if source == :web
-        return get_instruments_web_service(server_url)
-    else
-        return get_instruments_cached(server_url; kw...)
-    end
+    return source == :web ?
+        get_instruments_web_service(server_url) :
+        get_instruments_cached(server_url; kw...)
 end
 
 function get_instruments_web_service(server)
