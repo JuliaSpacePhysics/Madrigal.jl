@@ -17,14 +17,14 @@ end
 
 
 function _show(x::Parameter, field)
-    if field == :is_measured
-        return getfield(x, field) ? "1 (measured)" : "0 (derivable)"
+    return if field == :is_measured
+        getfield(x, field) ? "1 (measured)" : "0 (derivable)"
     elseif field == :is_error
-        return getfield(x, field) ? "1 (error parameter)" : "0"
+        getfield(x, field) ? "1 (error parameter)" : "0"
     elseif field == :is_sure
-        return getfield(x, field) ? "1 (found for every record)" : "0 (not found for every record)"
+        getfield(x, field) ? "1 (found for every record)" : "0 (not found for every record)"
     else
-        return getfield(x, field)
+        getfield(x, field)
     end
 end
 

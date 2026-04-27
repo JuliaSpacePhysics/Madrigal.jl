@@ -77,11 +77,9 @@ get_experiment_files(100000009, source=:web)  # From web service
 function get_experiment_files(id; server = Default_server[], source = :cache, kw...)
     server_url = get_url(server)
     @assert source in (:web, :cache)
-    if source == :web
-        return get_experiment_files_web_service(server_url, id; kw...)
-    else
-        return get_experiment_files_cached(server_url, id; kw...)
-    end
+    return source == :web ?
+        get_experiment_files_web_service(server_url, id; kw...) :
+        get_experiment_files_cached(server_url, id; kw...)
 end
 
 get_experiment_files(; server = Default_server[]) = get_experiment_files_cached(get_url(server))
