@@ -11,10 +11,8 @@ For Python, see the wrapper in [`python/`](python/README.md) (PyPI: `madrigal-jl
 
 ```julia
 using Pkg; Pkg.add("Madrigal")
-using Madrigal
-using Dates
+using Madrigal, Dates
 
-# Get instruments (fast cached access by default)
 insts = get_instruments()
 
 kinst = 30 # "Millstone Hill IS Radar"
@@ -22,7 +20,6 @@ kindat = 3408 # "Combined basic parameters file - all antennas and modes"
 tstart = Date(1998, 1, 19)
 tend = Date(1998, 12, 31)
 
-# Get experiments (cached by default, use source=:web for latest data)
 exps = get_experiments(kinst, tstart, tend)
 files = get_experiment_files(exps[1])
 file = filter(f -> f.kindat == kindat, files)[1]
@@ -39,6 +36,20 @@ download_file.(files)
 # or
 download_files(kinst, kindat, "1998-01-18", "1998-01-22")
 ```
+
+An instrument can be named by its mnemonic instead of its `kinst`: `get_instrument_files(:mlh, tstart, tend)`.
+The queries return `CSV.File`, accessed by column name:
+
+```julia
+insts[1].kinst, .mnemonic, .name, .latitude, .longitude, .altitude, .category
+exps[1].id, .url, .name, .site_id, .start_date, .end_date, .kinst, .pi_name, .pi_email
+files[1].name, .id, .kindat, .category, .status, .permission, .mod_date
+params[1].mnemonic, .description, .units, .is_measured, .is_error, .category
+```
+
+`download_file(file, destination = nothing; dir, format = :hdf5, force = false, throw = false)` returns the path, or **`nothing` after a warning if the request fails**. Without `dir`, files go to a temporary directory that disappears with the process; set `dir` to keep them. An existing file at the target path is returned untouched unless `force = true`. `format` is `:hdf5`, `:simple` (ASCII), or `:netCDF4`.
+
+Other servers, live (uncached) queries, and configuration options are covered in [`docs/src/index.md`](docs/src/index.md) ([rendered](https://JuliaSpacePhysics.github.io/Madrigal.jl/dev/)).
 
 ## Notes
 

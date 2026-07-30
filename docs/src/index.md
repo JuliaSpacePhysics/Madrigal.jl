@@ -77,9 +77,25 @@ get_instruments(source=:web)
 get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31), source=:web)
 ```
 
+!!! warning "Column names differ between sources"
+    The web services return a different set of fields than the metadata tables. Most notably, files carry `filename` (the full server-side path) instead of `name`, plus `description` and `doi`. `kindat`, `category`, `status`, and `permission` are present in both.
+
+### Cache control
+
+Metadata files are cached on disk for 7 days — under `~/Library/Caches/Madrigal` (macOS), `$XDG_CACHE_HOME/madrigal` (Linux), or `%LOCALAPPDATA%\Madrigal\Cache` (Windows) — and the parsed tables are memoized in memory for the session.
+
+```julia
+get_experiments(30, t0, t1; update=true)  # refresh the parsed table for this call
+clear_metadata_cache!()                   # drop all memoized tables
+```
+
+### Other servers
+
+Every function accepts a `server` keyword (a URL `String` or a `Server`), i.e. `get_instrument_files(72, 6400, t0, t1; server="http://madrigal.eiscat.se")`.
+
 ## Configuration Options
 
-`Madrigal.jl` offers two ways to configure your settings:
+Madrigal servers ask for user identification on download; the defaults are anonymous. Downloads also go to a temporary directory unless `dir` is set, so they do not survive the session.
 
 ### Option 1: Using API Functions
 
