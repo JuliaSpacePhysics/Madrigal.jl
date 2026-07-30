@@ -89,7 +89,7 @@ get_experiment_files(exp::Union{Experiment, CSV.Row}; kw...) = get_experiment_fi
 # https://github.com/MITHaystack/openmadrigal/blob/main/madroot/source/madpy/scripts/bin/getExperimentFiles.py
 function get_experiment_files_web_service(server, id::Integer; getNonDefault = false)
     url = server * "/getExperimentFilesService.py"
-    response = HTTP.get(url, query = (; id, getNonDefault))
+    response = HTTP.get(url, query = _query((; id, getNonDefault)))
     header = [:filename, :kindat, :description, :category, :status, :permission, :doi]
     types = IdDict(:permission => Bool)
     return CSV.File(response.body; header, types, stringtype = PosLenString)
@@ -113,7 +113,7 @@ end
     fileType = METADATA_TYPES[:files]
     url = server * "/getMetadata?fileType=$fileType"
     data = cached_get(url)
-    csv = (downcast = true, silencewarnings = true, dateformat = "yyyymmdd")
+    csv = (downcast = true, silencewarnings = true, dateformat = "yyyymmdd", ntasks = 1)
     header = [:name, :id, :kindat, :category, :status, :access, :permission, :mod_date, :mod_time, :Column10, :Column11, :Column12, :Column13]
     types = IdDict(:status => Bool, :access => Bool, :permission => Bool, :mod_date => DateTime, :mod_time => Int32)
     return CSV.File(data; drop = 10:13, header, types, csv..., stringtype = PosLenString)

@@ -12,6 +12,20 @@ const fileTypes = Dict(:hdf5 => -2, :simple => -1, :netCDF4 => -3)
 
 _basename(r) = hasproperty(r, :name) ? r.name : Base.basename(r.filename)
 
+function _download(url, path; query, kw...)
+    try
+        response = open(path, "w") do io
+            HTTP.get(url; query = _query(query), response_stream = io, HTTP_LIMITS..., kw...)
+        end
+        200 <= response.status < 300 ||
+            error("download request returned HTTP status $(response.status)")
+        return path
+    catch
+        isfile(path) && rm(path)
+        rethrow()
+    end
+end
+
 """
     download_file(file, destination = nothing; kws...)
 
@@ -40,10 +54,9 @@ function download_file(
         )
         url = get_url(server) * "/getMadfile.cgi"
         try
-            HTTP.download(url, path; query, download...)
+            _download(url, path; query, download...)
         catch e
             @warn "Failed to download file: $(sprint(showerror, e))"
-            isfile(path) && rm(path)
             throw ? rethrow() : nothing
         end
     end

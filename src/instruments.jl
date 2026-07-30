@@ -2,8 +2,6 @@
     Instrument
 
 A struct that encapsulates information about a Madrigal Instrument.
-
-Similar to the `MadrigalInstrument` class in the madrigalWeb python module.
 """
 
 @concrete terse struct Instrument{T} <: AbstractMadrigalObject
@@ -29,23 +27,16 @@ Instrument(r::CSV.Row) = Instrument(kinst(r), r.name, r.mnemonic, r.latitude, r.
 Returns all Madrigal instruments from the `server`.
 
 By default uses cached metadata for faster access. Set `source=:web` for direct web service access.
-
-# Examples
-```julia
-# Get all instruments using cached metadata (fast)
-get_instruments()
-
-# Get all instruments using web service (up-to-date but slower)
-get_instruments(source=:web)
-```
 """
-function get_instruments(server = Default_server[]; source = :cache, kw...)
+function get_instruments(server; source = :cache, kw...)
     @assert source in (:web, :cache)
     server_url = get_url(server)
     return source == :web ?
         get_instruments_web_service(server_url) :
         get_instruments_cached(server_url; kw...)
 end
+
+get_instruments(; server = Default_server[], kw...) = get_instruments(server; kw...)
 
 function get_instruments_web_service(server)
     url = server * "/getInstrumentsService.py"

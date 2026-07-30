@@ -1,5 +1,15 @@
-get_url(url; clean = true) = clean ? rstrip(url, '/') : url
+get_url(url; clean=true) = clean ? rstrip(url, '/') : url
 get_url(server::Server; kw...) = get_url(server.url; kw...)
+
+# HTTP 2 dropped NamedTuple queries and caps decompressed bodies at 64 MB
+_query(q::NamedTuple) = [string(k) => string(v) for (k, v) in pairs(q)]
+_query(q) = q
+
+const HTTP_LIMITS = @static if pkgversion(HTTP) >= v"2"
+    (; max_decompressed_size=typemax(Int))
+else
+    (;)
+end
 
 const CACHE_DIR = @static if Sys.iswindows()
     # Windows: %LOCALAPPDATA%\Madrigal\Cache
@@ -21,9 +31,9 @@ Get URL with persistent disk caching.
 Cache files are stored in `cache_dir` and expire after `max_age_days` days (default: 7).
 Since the Madrigal server doesn't provide Last-Modified headers, we rely on age-based expiration.
 """
-function cached_get(url; max_age_days = 7, cache_dir = CACHE_DIR, kw...)
+function cached_get(url; max_age_days=7, cache_dir=CACHE_DIR, kw...)
     isdir(cache_dir) || mkpath(cache_dir)
-    filename = string(hash(url), base = 16)
+    filename = string(hash(url), base=16)
     cache_file = joinpath(cache_dir, filename)
 
     # Check if cache file exists and is recent enough
@@ -35,7 +45,7 @@ function cached_get(url; max_age_days = 7, cache_dir = CACHE_DIR, kw...)
     end
 
     # Download and cache
-    response = HTTP.get(url; kw...)
+    response = HTTP.get(url; HTTP_LIMITS..., kw...)
     write(cache_file, response.body)
     return IOBuffer(response.body)
 end
