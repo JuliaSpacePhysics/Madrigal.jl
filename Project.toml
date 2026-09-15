@@ -15,7 +15,7 @@ Memoization = "6fafb56a-5788-4b4e-91ca-c0cea6611c73"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
-CSV = "0.10"
+CSV = "0.10, 1.0"
 ConcreteStructs = "0.2"
 Dates = "1"
 HTTP = "1, 2"
