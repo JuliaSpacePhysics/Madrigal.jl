@@ -59,5 +59,5 @@ function get_experiment_file_parameters(file; server = Default_server[])
 
     header = [:mnemonic, :description, :is_error, :units, :is_measured, :category, :is_sure, :is_add_increment]
     types = IdDict(:is_error => Bool, :is_measured => Bool, :is_sure => Bool)
-    return CSV.File(response.body; header, types, stringtype = PosLenString, delim = '\\')
+    return CSV.File(response.body; header, types, delim = '\\', CSV_BOOL...)
 end

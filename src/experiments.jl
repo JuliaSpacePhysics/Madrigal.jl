@@ -13,7 +13,7 @@ Similar to the `MadrigalExperiment` class in the madrigalWeb python module.
     access
 end
 
-Experiment(r::CSV.Row) = Experiment(r.id, r.url, r.name, r.site_id, kinst(r), r.access)
+Experiment(r::Tables.AbstractRow) = Experiment(r.id, r.url, r.name, r.site_id, kinst(r), r.access)
 
 """
     get_experiments(; server = Default_server[])
@@ -56,7 +56,7 @@ function get_experiments_web_service(server, code, startyear, startmonth, startd
     url = server * "/getExperimentsService.py"
     response = HTTP.get(url; query = _query(query))
     header = [:id, :url, :name, :site_id, :site_name, :kinst, :instname, :startyear, :startmonth, :startday, :starthour, :startmin, :startsec, :endyear, :endmonth, :endday, :endhour, :endmin, :endsec, :isLocal, :pi_name, :pi_email, :uttimestamp, :access]
-    return CSV.File(response.body; header, stringtype = PosLenString)
+    return CSV.File(response.body; header)
 end
 
 function get_experiments_cached(server = Default_server[]; update = false)
@@ -77,5 +77,5 @@ end
     data = cached_get(url)
     header = [:id, :url, :name, :site_id, :start_date, :start_time, :end_date, :end_time, :kinst, :access, :pi_name, :pi_email]
     types = IdDict(:start_date => Date, :end_date => Date)
-    return CSV.File(data; header, types, silencewarnings = true, dateformat = "yyyymmdd", stringtype = PosLenString, downcast = true)
+    return CSV.File(data; header, types, dateformat = "yyyymmdd", downcast = true, CSV_QUIET...)
 end

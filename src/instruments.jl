@@ -16,9 +16,9 @@ A struct that encapsulates information about a Madrigal Instrument.
     category
 end
 
-kinst(r::CSV.Row) = r.kinst
+kinst(r::Tables.AbstractRow) = r.kinst
 
-Instrument(r::CSV.Row) = Instrument(kinst(r), r.name, r.mnemonic, r.latitude, r.longitude, r.altitude, r.category)
+Instrument(r::Tables.AbstractRow) = Instrument(kinst(r), r.name, r.mnemonic, r.latitude, r.longitude, r.altitude, r.category)
 
 
 """
@@ -42,7 +42,7 @@ function get_instruments_web_service(server)
     url = server * "/getInstrumentsService.py"
     response = HTTP.get(url)
     header = [:name, :kinst, :mnemonic, :latitude, :longitude, :altitude, :category, :pi_name, :pi_email]
-    return CSV.File(response.body; header, stringtype = PosLenString)
+    return CSV.File(response.body; header)
 end
 
 function get_instruments_cached(server; update = false)
@@ -55,5 +55,5 @@ end
     url = server * "/getMetadata?fileType=$fileType"
     data = cached_get(url)
     header = [:kinst, :mnemonic, :name, :latitude, :longitude, :altitude, :contact, :contactAddr1, :contactAddr2, :contactAddr3, :contactCity, :contactState, :contactZip, :contactCountry, :contactPhone, :contactEmail, :category]
-    return CSV.File(data; header, stringtype = PosLenString)
+    return CSV.File(data; header)
 end
