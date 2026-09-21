@@ -3,6 +3,7 @@ using Dates
 using TOML
 using HTTP
 using CSV
+using Tables: Tables
 using ConcreteStructs
 using Memoization
 using Memoization: empty_cache!

@@ -38,7 +38,7 @@ function get_metadata(id; server = Default_server[])
     url = server_url * "/getMetadata?fileType=$(get(METADATA_TYPES, id, id))"
     data = cached_get(url)
     header = false
-    return CSV.File(data; header, stringtype = PosLenString, silencewarnings = true)
+    return CSV.File(data; header, CSV_QUIET...)
 end
 
 """

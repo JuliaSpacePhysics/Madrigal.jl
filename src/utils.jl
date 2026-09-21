@@ -11,6 +11,15 @@ else
     (;)
 end
 
+# Madrigal spells booleans as 1/0, which CSV does not accept by default
+const CSV_BOOL = (; truestrings = ["1"], falsestrings = ["0"])
+
+const CSV_QUIET = @static if pkgversion(CSV) >= v"1"
+    (; on_error = :collect)
+else
+    (; silencewarnings = true)
+end
+
 const CACHE_DIR = @static if Sys.iswindows()
     # Windows: %LOCALAPPDATA%\Madrigal\Cache
     joinpath(get(ENV, "LOCALAPPDATA", homedir()), "Madrigal", "Cache")

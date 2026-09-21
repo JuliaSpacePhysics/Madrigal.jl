@@ -14,8 +14,7 @@ filename(r; server) = hasproperty(r, :filename) ? r.filename : joinpath(getexpPa
 
 Base.String(exp::ExperimentFile) = exp.name
 
-# Constructor from CSV.Row for direct mapping
-function ExperimentFile(r::CSV.Row)
+function ExperimentFile(r::Tables.AbstractRow)
     if hasproperty(r, :filename)
         filename = r.filename
         name = last(split(filename, '/'))
@@ -84,7 +83,7 @@ end
 
 get_experiment_files(; server = Default_server[]) = get_experiment_files_cached(get_url(server))
 
-get_experiment_files(exp::Union{Experiment, CSV.Row}; kw...) = get_experiment_files(exp.id; kw...)
+get_experiment_files(exp::Union{Experiment, Tables.AbstractRow}; kw...) = get_experiment_files(exp.id; kw...)
 
 # https://github.com/MITHaystack/openmadrigal/blob/main/madroot/source/madpy/scripts/bin/getExperimentFiles.py
 function get_experiment_files_web_service(server, id::Integer; getNonDefault = false)
@@ -92,7 +91,7 @@ function get_experiment_files_web_service(server, id::Integer; getNonDefault = f
     response = HTTP.get(url, query = _query((; id, getNonDefault)))
     header = [:filename, :kindat, :description, :category, :status, :permission, :doi]
     types = IdDict(:permission => Bool)
-    return CSV.File(response.body; header, types, stringtype = PosLenString)
+    return CSV.File(response.body; header, types, CSV_BOOL...)
 end
 
 get_experiment_files_web_service(server, ids; kw...) =
@@ -113,8 +112,8 @@ end
     fileType = METADATA_TYPES[:files]
     url = server * "/getMetadata?fileType=$fileType"
     data = cached_get(url)
-    csv = (downcast = true, silencewarnings = true, dateformat = "yyyymmdd", ntasks = 1)
     header = [:name, :id, :kindat, :category, :status, :access, :permission, :mod_date, :mod_time, :Column10, :Column11, :Column12, :Column13]
-    types = IdDict(:status => Bool, :access => Bool, :permission => Bool, :mod_date => DateTime, :mod_time => Int32)
-    return CSV.File(data; drop = 10:13, header, types, csv..., stringtype = PosLenString)
+    types = IdDict(:status => Bool, :access => Bool, :permission => Bool, :mod_date => Date, :mod_time => Int32)
+    # CSV 0.10 misparses this file with multiple tasks (#31)
+    return CSV.File(data; drop = 10:13, header, types, dateformat = "yyyymmdd", downcast = true, ntasks = 1, CSV_BOOL..., CSV_QUIET...)
 end
