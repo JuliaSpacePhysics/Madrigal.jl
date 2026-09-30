@@ -27,8 +27,6 @@ jobs:
     with:
       versions: '["1", "lts"]'
       os: '["ubuntu-latest", "macos-latest"]'
-      env: |
-        JULIA_NUM_THREADS=auto
     permissions:
       actions: write
       contents: read
