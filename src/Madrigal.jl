@@ -7,7 +7,6 @@ using Tables: Tables
 using ConcreteStructs
 using Memoization
 using Memoization: empty_cache!
-import Base: getproperty
 
 include("types.jl")
 include("utils.jl")
@@ -29,13 +28,10 @@ export Server
 export clear_metadata_cache!
 
 function __init__()
-    # Check for .Madrigal.cfg in the user's home directory
     cfg_path = joinpath(homedir(), ".Madrigal.cfg")
     if isfile(cfg_path)
         try
-            config = TOML.parsefile(cfg_path)
-            # Set user information from config
-            set_default_from_config!(config)
+            set_default_from_config!(TOML.parsefile(cfg_path))
         catch e
             @warn "Error reading .Madrigal.cfg: $e"
         end
