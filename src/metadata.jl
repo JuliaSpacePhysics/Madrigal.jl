@@ -33,12 +33,15 @@ get_metadata(:experiments)
 get_metadata(:files)
 ```
 """
-function get_metadata(id; server = Default_server[])
+get_metadata(id; server = Default_server[]) =
+    CSV.File(cached_get(metadata_url(id, server)); header = false, CSV_QUIET...)
+
+metadata_url(id, server) = get_url(server) * "/getMetadata?fileType=$(get(METADATA_TYPES, id, id))"
+
+function _load_metadata(parse, id, server, update)
     server_url = get_url(server)
-    url = server_url * "/getMetadata?fileType=$(get(METADATA_TYPES, id, id))"
-    data = cached_get(url)
-    header = false
-    return CSV.File(data; header, CSV_QUIET...)
+    update && empty_cache!(parse)
+    return parse(server_url)
 end
 
 """

@@ -29,9 +29,8 @@ Returns all Madrigal instruments from the `server`.
 By default uses cached metadata for faster access. Set `source=:web` for direct web service access.
 """
 function get_instruments(server; source = :cache, kw...)
-    @assert source in (:web, :cache)
     server_url = get_url(server)
-    return source == :web ?
+    return _isweb(source) ?
         get_instruments_web_service(server_url) :
         get_instruments_cached(server_url; kw...)
 end
@@ -45,15 +44,11 @@ function get_instruments_web_service(server)
     return CSV.File(response.body; header)
 end
 
-function get_instruments_cached(server; update = false)
-    update && empty_cache!(_get_instruments_cached)
-    return _get_instruments_cached(server)
-end
+get_instruments_cached(server; update = false) =
+    _load_metadata(_get_instruments_cached, :instruments, server, update)
 
 @memoize function _get_instruments_cached(server)
-    fileType = METADATA_TYPES[:instruments]
-    url = server * "/getMetadata?fileType=$fileType"
-    data = cached_get(url)
+    data = cached_get(metadata_url(:instruments, server))
     header = [:kinst, :mnemonic, :name, :latitude, :longitude, :altitude, :contact, :contactAddr1, :contactAddr2, :contactAddr3, :contactCity, :contactState, :contactZip, :contactCountry, :contactPhone, :contactEmail, :category]
     return CSV.File(data; header)
 end
