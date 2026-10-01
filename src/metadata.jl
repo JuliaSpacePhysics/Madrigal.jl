@@ -38,20 +38,25 @@ get_metadata(id; server = Default_server[]) =
 
 metadata_url(id, server) = get_url(server) * "/getMetadata?fileType=$(get(METADATA_TYPES, id, id))"
 
+# Memoized tables sit on top of the disk cache, so a refresh has to bypass both
 function _load_metadata(parse, id, server, update)
     server_url = get_url(server)
-    update && empty_cache!(parse)
+    if update
+        empty_cache!(parse)
+        cached_get(metadata_url(id, server_url); max_age_days = 0)
+    end
     return parse(server_url)
 end
 
 """
     clear_metadata_cache!()
 
-Clear all cached metadata results. Useful when the server data has been updated.
+Clear all cached metadata, in memory and on disk. Useful when the server data has been updated.
 """
 function clear_metadata_cache!()
-    Memoization.empty_cache!(_get_instruments_cached)
-    Memoization.empty_cache!(_get_experiments_cached)
-    Memoization.empty_cache!(_get_files_cached)
+    empty_cache!(_get_instruments_cached)
+    empty_cache!(_get_experiments_cached)
+    empty_cache!(_get_files_cached)
+    rm(default_cache_dir(); recursive = true, force = true)
     return nothing
 end

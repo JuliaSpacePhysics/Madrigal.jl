@@ -124,3 +124,9 @@ end
     @test occursin("1 (error parameter)", s)
     @test occursin("1 (found for every record)", s)
 end
+
+@testitem "update refetches past the disk cache" begin
+    url = Madrigal.metadata_url(:instruments, Madrigal.Default_server[])
+    write(joinpath(Madrigal.default_cache_dir(), string(hash(url), base = 16)), "stale")
+    @test length(get_instruments(update = true)) > 1
+end
