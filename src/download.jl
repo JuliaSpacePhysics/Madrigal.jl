@@ -42,7 +42,7 @@ function download_file(
     if isfile(path) && !force
         return path
     else
-        fileType = get(fileTypes, format, 4)
+        fileType = fileTypes[format]
         query = (;
             fileName = filename(file; server),
             fileType = string(fileType),
