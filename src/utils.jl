@@ -1,5 +1,10 @@
-get_url(url; clean=true) = clean ? rstrip(url, '/') : url
-get_url(server::Server; kw...) = get_url(server.url; kw...)
+get_url(url) = rstrip(url, '/')
+get_url(server::Server) = get_url(server.url)
+
+function _isweb(source)
+    source in (:web, :cache) || throw(ArgumentError("source must be :web or :cache, got $(repr(source))"))
+    return source === :web
+end
 
 # HTTP 2 dropped NamedTuple queries and caps decompressed bodies at 64 MB
 _query(q::NamedTuple) = [string(k) => string(v) for (k, v) in pairs(q)]

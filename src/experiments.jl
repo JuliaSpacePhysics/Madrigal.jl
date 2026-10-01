@@ -31,18 +31,14 @@ get_experiments(30, Date(2020, 1, 1), Date(2020, 12, 31), source=:web)  # From w
 ```
 """
 function get_experiments(code, t0 = DateTime(1950, 1, 1), t1 = Dates.now(); server = Default_server[], source = :cache, kw...)
-    @assert source in (:web, :cache)
-    server_url = get_url(server)
     t0 = DateTime(t0)
     t1 = DateTime(t1)
-    return if source == :web
-        get_experiments_web_service(server_url, kinst(code), t0, t1)
-    else
+    return _isweb(source) ?
+        get_experiments_web_service(get_url(server), kinst(code), t0, t1) :
         get_experiments_cached(server, kinst(code), t0, t1; kw...)
-    end
 end
 
-get_experiments(; server = Default_server[]) = get_experiments_cached(get_url(server))
+get_experiments(; server = Default_server[]) = get_experiments_cached(server)
 
 function get_experiments_web_service(server, code, t0, t1)
     units = ("year", "month", "day", "hour", "min", "sec")
@@ -53,10 +49,8 @@ function get_experiments_web_service(server, code, t0, t1)
     return CSV.File(response.body; header)
 end
 
-function get_experiments_cached(server = Default_server[]; update = false)
-    update && empty_cache!(_get_experiments_cached)
-    return _get_experiments_cached(get_url(server))
-end
+get_experiments_cached(server = Default_server[]; update = false) =
+    _load_metadata(_get_experiments_cached, :experiments, server, update)
 
 function get_experiments_cached(server, kinst, t0, t1; kw...)
     # Filter by instrument and date range
@@ -66,9 +60,7 @@ function get_experiments_cached(server, kinst, t0, t1; kw...)
 end
 
 @memoize function _get_experiments_cached(server)
-    fileType = METADATA_TYPES[:experiments]
-    url = server * "/getMetadata?fileType=$fileType"
-    data = cached_get(url)
+    data = cached_get(metadata_url(:experiments, server))
     header = [:id, :url, :name, :site_id, :start_date, :start_time, :end_date, :end_time, :kinst, :access, :pi_name, :pi_email]
     types = IdDict(:start_date => Date, :end_date => Date)
     return CSV.File(data; header, types, dateformat = "yyyymmdd", downcast = true, CSV_QUIET...)

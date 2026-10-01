@@ -61,13 +61,12 @@ get_experiment_files(100000009, source=:web)  # From web service
 """
 function get_experiment_files(id; server = Default_server[], source = :cache, kw...)
     server_url = get_url(server)
-    @assert source in (:web, :cache)
-    return source == :web ?
+    return _isweb(source) ?
         get_experiment_files_web_service(server_url, id; kw...) :
         get_experiment_files_cached(server_url, id; kw...)
 end
 
-get_experiment_files(; server = Default_server[]) = get_experiment_files_cached(get_url(server))
+get_experiment_files(; server = Default_server[]) = get_experiment_files_cached(server)
 
 get_experiment_files(exp::Union{Experiment, Tables.AbstractRow}; kw...) = get_experiment_files(exp.id; kw...)
 
@@ -83,21 +82,16 @@ end
 get_experiment_files_web_service(server, ids; kw...) =
     vcat(get_experiment_files_web_service.(server, ids; kw...)...)
 
-function get_experiment_files_cached(server = Default_server[]; update = false)
-    update && empty_cache!(_get_files_cached)
-    return _get_files_cached(get_url(server))
-end
+get_experiment_files_cached(server = Default_server[]; update = false) =
+    _load_metadata(_get_files_cached, :files, server, update)
 
 function get_experiment_files_cached(server, id; kw...)
     files = get_experiment_files_cached(server; kw...)
     return @views files[∈(id).(files.id)]
-    # return @views files[files.id .∈ (id,)] # this is slower but consumes less memory
 end
 
 @memoize function _get_files_cached(server)
-    fileType = METADATA_TYPES[:files]
-    url = server * "/getMetadata?fileType=$fileType"
-    data = cached_get(url)
+    data = cached_get(metadata_url(:files, server))
     header = [:name, :id, :kindat, :category, :status, :access, :permission, :mod_date, :mod_time, :Column10, :Column11, :Column12, :Column13]
     types = IdDict(:status => Bool, :access => Bool, :permission => Bool, :mod_date => Date, :mod_time => Int32)
     # CSV 0.10 misparses this file with multiple tasks (#31)
