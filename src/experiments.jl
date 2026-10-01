@@ -44,17 +44,11 @@ end
 
 get_experiments(; server = Default_server[]) = get_experiments_cached(get_url(server))
 
-get_experiments_web_service(server, code, t0, t1) =
-    get_experiments_web_service(
-    server, code,
-    decompose_datetime(t0)...,
-    decompose_datetime(t1)...
-)
-
-function get_experiments_web_service(server, code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
-    query = (; code, startyear, startmonth, startday, starthour, startmin, startsec, endyear, endmonth, endday, endhour, endmin, endsec)
-    url = server * "/getExperimentsService.py"
-    response = HTTP.get(url; query = _query(query))
+function get_experiments_web_service(server, code, t0, t1)
+    units = ("year", "month", "day", "hour", "min", "sec")
+    ymdhms(t) = (year(t), month(t), day(t), hour(t), minute(t), second(t))
+    query = ["code" => string(code); [p * u => string(v) for (p, t) in (("start", t0), ("end", t1)) for (u, v) in zip(units, ymdhms(t))]]
+    response = HTTP.get(server * "/getExperimentsService.py"; query)
     header = [:id, :url, :name, :site_id, :site_name, :kinst, :instname, :startyear, :startmonth, :startday, :starthour, :startmin, :startsec, :endyear, :endmonth, :endday, :endhour, :endmin, :endsec, :isLocal, :pi_name, :pi_email, :uttimestamp, :access]
     return CSV.File(response.body; header)
 end

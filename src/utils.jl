@@ -57,9 +57,3 @@ function cached_get(url; max_age_days=7, cache_dir=default_cache_dir(), kw...)
     write(cache_file, response.body)
     return IOBuffer(response.body)
 end
-
-function decompose_datetime(t::DateTime)
-    return year(t), month(t), day(t), hour(t), minute(t), second(t)
-end
-
-decompose_datetime(t) = decompose_datetime(DateTime(t))
