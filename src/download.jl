@@ -10,8 +10,6 @@ end
 
 const fileTypes = Dict(:hdf5 => -2, :simple => -1, :netCDF4 => -3)
 
-_basename(r) = hasproperty(r, :name) ? r.name : Base.basename(r.filename)
-
 function _download(url, path; query, kw...)
     try
         response = open(path, "w") do io

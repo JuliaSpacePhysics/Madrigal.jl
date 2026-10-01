@@ -10,29 +10,15 @@
     permission
 end
 
+_basename(r) = hasproperty(r, :name) ? r.name : basename(r.filename)
 filename(r; server) = hasproperty(r, :filename) ? r.filename : joinpath(getexpPath(r.id; server), r.name)
 
 Base.String(exp::ExperimentFile) = exp.name
 
-function ExperimentFile(r::Tables.AbstractRow)
-    if hasproperty(r, :filename)
-        filename = r.filename
-        name = last(split(filename, '/'))
-    else
-        filename = joinpath(getexpPath(r.id), r.name)
-        name = r.name
-    end
-    return ExperimentFile(
-        name,
-        filename,
-        r.kindat,
-        r.category,
-        r.status,
-        r.permission,
-    )
-end
+ExperimentFile(r::Tables.AbstractRow; server = Default_server[]) =
+    ExperimentFile(_basename(r), filename(r; server), r.kindat, r.category, r.status, r.permission)
 
-getMadroot(server) = server != "http://madrigal.eiscat.se" ? "/opt/openmadrigal/madroot/" : "/opt/madrigal"
+getMadroot(server_url) = server_url != "http://madrigal.eiscat.se" ? "/opt/openmadrigal/madroot/" : "/opt/madrigal"
 
 function getexpPath(id; server = Default_server[])
     # Get experiment data to find the URL
@@ -43,7 +29,7 @@ function getexpPath(id; server = Default_server[])
     isnothing(madtoc_index) && throw(ArgumentError("Invalid experiment URL format: $(exp.url)"))
     # Get the relative path after /madtoc/
     relative_path = exp.url[(madtoc_index[end] + 1):end]
-    return joinpath(getMadroot(server), relative_path)
+    return joinpath(getMadroot(get_url(server)), relative_path)
 end
 
 function _show(x::ExperimentFile, field)
