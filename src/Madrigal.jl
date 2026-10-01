@@ -50,8 +50,9 @@ function get_instrument_files(inst, t0, t1; server = Default_server[], kw...)
     return get_experiment_files(exp_ids; server, kw...)
 end
 
-function get_instrument_files(kinst, kindat, t0, t1; server = Default_server[])
-    files = get_instrument_files(kinst, t0, t1; server)
+function get_instrument_files(kinst, kindat, t0, t1; kw...)
+    files = get_instrument_files(kinst, t0, t1; kw...)
+    # filter on an empty CSV.File view throws a TypeError
     return isempty(files) ? files : filter(f -> f.kindat in kindat, files)
 end
 
