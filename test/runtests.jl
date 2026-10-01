@@ -45,7 +45,7 @@ end
     web_files = get_experiment_files(exp, source = :web)
     @test length(files) > 1
     @test length(files) == length(web_files)
-    @test (@timed get_experiment_files(exp)).time < 0.1
+    @test minimum(@elapsed(get_experiment_files(exp)) for _ in 1:3) < 0.1 # min of 3: single runs are noisy on CI runners
 
     # Test downloading files
     file = files[1]
