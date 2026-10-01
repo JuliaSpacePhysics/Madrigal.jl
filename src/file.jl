@@ -21,13 +21,11 @@ ExperimentFile(r::Tables.AbstractRow; server = Default_server[]) =
 getMadroot(server_url) = server_url != "http://madrigal.eiscat.se" ? "/opt/openmadrigal/madroot/" : "/opt/madrigal"
 
 function getexpPath(id; server = Default_server[])
-    # Get experiment data to find the URL
     exps = get_experiments_cached(get_url(server))
     exp = exps[exps.id .== id] |> only
 
     madtoc_index = findfirst("/madtoc/", exp.url)
     isnothing(madtoc_index) && throw(ArgumentError("Invalid experiment URL format: $(exp.url)"))
-    # Get the relative path after /madtoc/
     relative_path = exp.url[(madtoc_index[end] + 1):end]
     return joinpath(getMadroot(get_url(server)), relative_path)
 end

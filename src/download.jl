@@ -39,23 +39,19 @@ function download_file(
     )
     mkpath(dir)
     path = @something destination joinpath(dir, _basename(file))
-    if isfile(path) && !force
-        return path
-    else
-        fileType = fileTypes[format]
-        query = (;
-            fileName = filename(file; server),
-            fileType = string(fileType),
-            user_fullname = name,
-            user_email = email,
-            user_affiliation = affiliation,
-        )
-        url = get_url(server) * "/getMadfile.cgi"
-        try
-            _download(url, path; query, download...)
-        catch e
-            @warn "Failed to download file: $(sprint(showerror, e))"
-            throw ? rethrow() : nothing
-        end
+    isfile(path) && !force && return path
+    query = (;
+        fileName = filename(file; server),
+        fileType = string(fileTypes[format]),
+        user_fullname = name,
+        user_email = email,
+        user_affiliation = affiliation,
+    )
+    url = get_url(server) * "/getMadfile.cgi"
+    return try
+        _download(url, path; query, download...)
+    catch e
+        @warn "Failed to download file: $(sprint(showerror, e))"
+        throw ? rethrow() : nothing
     end
 end
