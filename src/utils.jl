@@ -20,27 +20,26 @@ else
     (; silencewarnings = true)
 end
 
-const CACHE_DIR = @static if Sys.iswindows()
-    # Windows: %LOCALAPPDATA%\Madrigal\Cache
-    joinpath(get(ENV, "LOCALAPPDATA", homedir()), "Madrigal", "Cache")
-elseif Sys.isapple()
-    # macOS: ~/Library/Caches/Madrigal
-    joinpath(homedir(), "Library", "Caches", "Madrigal")
-else
-    # Linux/Unix: ~/.cache/madrigal (XDG Base Directory)
-    xdg_cache = get(ENV, "XDG_CACHE_HOME", joinpath(homedir(), ".cache"))
-    joinpath(xdg_cache, "madrigal")
+# Resolved at runtime: a const would bake the precompiling machine's home/ENV into the image
+function default_cache_dir()
+    return if Sys.iswindows()
+        joinpath(get(ENV, "LOCALAPPDATA", homedir()), "Madrigal", "Cache")
+    elseif Sys.isapple()
+        joinpath(homedir(), "Library", "Caches", "Madrigal")
+    else
+        joinpath(get(ENV, "XDG_CACHE_HOME", joinpath(homedir(), ".cache")), "madrigal")
+    end
 end
 
 """
-    cached_get(url; max_age_days=7, cache_dir=CACHE_DIR, kw...)
+    cached_get(url; max_age_days=7, cache_dir=default_cache_dir(), kw...)
 
 Get URL with persistent disk caching. 
 
 Cache files are stored in `cache_dir` and expire after `max_age_days` days (default: 7).
 Since the Madrigal server doesn't provide Last-Modified headers, we rely on age-based expiration.
 """
-function cached_get(url; max_age_days=7, cache_dir=CACHE_DIR, kw...)
+function cached_get(url; max_age_days=7, cache_dir=default_cache_dir(), kw...)
     isdir(cache_dir) || mkpath(cache_dir)
     filename = string(hash(url), base=16)
     cache_file = joinpath(cache_dir, filename)
